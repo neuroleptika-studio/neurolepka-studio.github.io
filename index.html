@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Запись в кружок по нейролепке</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            touch-action: manipulation;
+        }
+        .form-input, .form-select, .form-textarea {
+            transition: all 0.3s ease;
+            font-size: 16px;
+            min-height: 50px;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+            border-color: #818cf8;
+        }
+        .submit-btn {
+            transition: all 0.3s ease;
+            font-size: 18px;
+            font-weight: 600;
+            min-height: 55px;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .success-message, .error-message {
+            display: none;
+        }
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .mobile-friendly {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .content-wrapper {
+            flex: 1;
+            padding: 16px;
+        }
+        @media (max-width: 640px) {
+            .text-3xl {
+                font-size: 1.5rem;
+            }
+            .text-lg {
+                font-size: 1rem;
+            }
+            .p-6 {
+                padding: 16px;
+            }
+            .submit-btn {
+                font-size: 18px;
+            }
+        }
+        .floating-label {
+            position: relative;
+            margin-bottom: 16px;
+        }
+        .floating-label label {
+            position: absolute;
+            left: 16px;
+            top: 16px;
+            font-size: 16px;
+            color: #6b7280;
+            transition: all 0.2s ease;
+            pointer-events: none;
+        }
+        .floating-label input:focus ~ label,
+        .floating-label input:not(:placeholder-shown) ~ label,
+        .floating-label textarea:focus ~ label,
+        .floating-label textarea:not(:placeholder-shown) ~ label {
+            top: -10px;
+            left: 12px;
+            font-size: 12px;
+            background-color: white;
+            padding: 0 4px;
+            color: #818cf8;
+        }
+        .icon-input {
+            position: relative;
+        }
+        .icon-input i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-size: 18px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .icon-input input, .icon-input textarea {
+            padding-left: 50px;
+            z-index: 2;
+        }
+        .time-slot {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .time-slot:hover {
+            transform: scale(1.02);
+        }
+        .time-slot.selected {
+            background-color: #818cf8;
+            color: white;
+            border-color: #818cf8;
+        }
+        input, select, textarea {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        .checkbox-container {
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+        }
+        input:focus, select:focus, textarea:focus {
+            font-size: 16px;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        /* Hidden contact styles */
+        .hidden-contact {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .hidden-contact:hover {
+            transform: scale(1.05);
+        }
+        .contact-info {
+            display: none;
+            margin-top: 8px;
+            padding: 8px 12px;
+            background-color: #f8fafc;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: center;
+        }
+        .contact-revealed .contact-info {
+            display: block;
+        }
+        /* Fix for checkbox */
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .checkbox-wrapper input[type="checkbox"] {
+            margin: 0;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 mobile-friendly">
+    <div class="content-wrapper">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mb-3 mx-auto">
+                <i class="fas fa-brain text-white text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Запись в кружок по нейролепке</h1>
+            <p class="text-base text-gray-600">Запишитесь за 1 минуту</p>
+        </div>
+
+        <!-- Success Message -->
+        <div id="successMessage" class="success-message bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-4 shadow-lg">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle text-green-500 text-xl mr-2"></i>
+                <div>
+                    <h3 class="text-base font-bold">Спасибо за запись!</h3>
+                    <p class="text-sm">Мы свяжемся с вами в течение 24 часов.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="error-message bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-4 shadow-lg">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-circle text-red-500 text-xl mr-2"></i>
+                <div>
+                    <h3 class="text-base font-bold">Ошибка отправки</h3>
+                    <p class="text-sm">Проверьте интернет и попробуйте снова.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Form -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="p-4">
+                <form id="registrationForm" action="https://formspree.io/f/mwpqgkea" method="POST">
+                    <!-- Child Name -->
+                    <div class="floating-label mb-3 icon-input">
+                        <input type="text" id="childName" name="childName" required 
+                               class="form-input w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                               placeholder=" ">
+                        <i class="fas fa-child"></i>
+                        <label for="childName">Имя ребенка</label>
+                    </div>
+                    
+                    <!-- Parent Name -->
+                    <div class="floating-label mb-3 icon-input">
+                        <input type="text" id="parentName" name="parentName" required 
+                               class="form-input w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                               placeholder=" ">
+                        <i class="fas fa-user"></i>
+                        <label for="parentName">Ваше имя</label>
+                    </div>
+                    
+                    <!-- Phone -->
+                    <div class="floating-label mb-3 icon-input">
+                        <input type="tel" id="phone" name="phone" required 
+                               class="form-input w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                               placeholder=" " inputmode="numeric">
+                        <i class="fas fa-phone"></i>
+                        <label for="phone">Телефон</label>
+                    </div>
+                    
+                    <!-- Email -->
+                    <div class="floating-label mb-3 icon-input">
+                        <input type="email" id="email" name="email" required 
+                               class="form-input w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                               placeholder=" " inputmode="email">
+                        <i class="fas fa-envelope"></i>
+                        <label for="email">Email</label>
+                    </div>
+                    
+                    <!-- Age Group -->
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Возраст ребенка</label>
+                        <select id="age" name="age" required 
+                                class="form-select w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            <option value="">Выберите возраст</option>
+                            <option value="5-6">5–6 лет</option>
+                            <option value="7-8">7–8 лет</option>
+                            <option value="9-10">9–10 лет</option>
+                            <option value="11-12">11–12 лет</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Preferred Time -->
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Удобное время</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="time-slot bg-gray-100 p-3 rounded-lg text-center border-2 border-gray-200" data-time="вторник 9.00-11.00">
+                                Вторник<br>9:00-11:00
+                            </div>
+                            <div class="time-slot bg-gray-100 p-3 rounded-lg text-center border-2 border-gray-200" data-time="среда 15.00-17.00">
+                                Среда<br>15:00-17:00
+                            </div>
+                            <div class="time-slot bg-gray-100 p-3 rounded-lg text-center border-2 border-gray-200" data-time="четверг 9.00-11.00">
+                                Четверг<br>9:00-11:00
+                            </div>
+                            <div class="time-slot bg-gray-100 p-3 rounded-lg text-center border-2 border-gray-200" data-time="пятница 15.00-17.00">
+                                Пятница<br>15:00-17:00
+                            </div>
+                            <div class="time-slot bg-gray-100 p-3 rounded-lg text-center border-2 border-gray-200" data-time="пятница 17.00-19.00">
+                                Пятница<br>17:00-19:00
+                            </div>
+                        </div>
+                        <input type="hidden" id="preferredTime" name="preferredTime" required>
+                    </div>
+                    
+                    <!-- Experience -->
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Опыт в лепке</label>
+                        <select id="experience" name="experience" 
+                                class="form-select w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            <option value="none">Нет опыта</option>
+                            <option value="beginner">Начинающий</option>
+                            <option value="intermediate">Средний</option>
+                            <option value="advanced">Опытный</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Notes -->
+                    <div class="floating-label mb-3 icon-input">
+                        <textarea id="notes" name="notes" rows="2"
+                                  class="form-textarea w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                  placeholder=" "></textarea>
+                        <i class="fas fa-edit"></i>
+                        <label for="notes">Пожелания (по желанию)</label>
+                    </div>
+                    
+                    <!-- Consent -->
+                    <div class="checkbox-container mb-4">
+                        <div class="checkbox-wrapper">
+                            <input id="consent" name="consent" type="checkbox" required 
+                                   class="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded mr-2">
+                            <label for="consent" class="text-sm text-gray-700">
+                                Я даю согласие на обработку персональных данных
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" id="submitBtn"
+                            class="submit-btn w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-4 px-6 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg">
+                        <i class="fas fa-paper-plane mr-2"></i> Записаться
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Hidden Contacts -->
+        <div class="mt-4 bg-white rounded-2xl shadow-lg p-3">
+            <h3 class="font-bold text-gray-800 text-center text-sm mb-2">Контакты</h3>
+            
+            <!-- Phone Contact -->
+            <div class="hidden-contact mb-3" onclick="toggleContact('phone')">
+                <div class="flex items-center justify-center bg-green-100 text-green-800 px-3 py-2 rounded-lg hover:bg-green-200 transition-colors">
+                    <i class="fas fa-phone mr-1"></i> Показать телефон
+                </div>
+                <div id="phone-contact" class="contact-info">
+                    <i class="fas fa-phone mr-1"></i> +7 964 937 53 01
+                </div>
+            </div>
+            
+            <!-- Email Contact -->
+            <div class="hidden-contact" onclick="toggleContact('email')">
+                <div class="flex items-center justify-center bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                    <i class="fas fa-envelope mr-1"></i> Показать email
+                </div>
+                <div id="email-contact" class="contact-info">
+                    <i class="fas fa-envelope mr-1"></i> tat23101978@mail.ru
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center mt-4 text-xs text-gray-500">
+            <p>© 2025 Кружок по нейролепке</p>
+        </div>
+    </div>
+
+    <script>
+        // Fix for icon overlapping text
+        document.querySelectorAll('.icon-input i').forEach(icon => {
+            icon.style.pointerEvents = 'none';
+            icon.style.zIndex = '1';
+        });
+        
+        // Ensure input has higher z-index
+        document.querySelectorAll('.icon-input input, .icon-input textarea').forEach(input => {
+            input.style.zIndex = '2';
+        });
+        
+        // Time slot selection
+        document.querySelectorAll('.time-slot').forEach(slot => {
+            slot.addEventListener('click', function() {
+                document.querySelectorAll('.time-slot').forEach(s => {
+                    s.classList.remove('selected');
+                    s.classList.add('bg-gray-100', 'border-gray-200');
+                });
+                
+                this.classList.add('selected');
+                this.classList.remove('bg-gray-100', 'border-gray-200');
+                
+                document.getElementById('preferredTime').value = this.getAttribute('data-time');
+            });
+        });
+        
+        // Form submission
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const submitBtn = document.getElementById('submitBtn');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            const preferredTime = document.getElementById('preferredTime').value;
+            const consent = document.getElementById('consent');
+            
+            // Validate time selection
+            if (!preferredTime) {
+                alert('Выберите удобное время');
+                return;
+            }
+            
+            // Validate consent
+            if (!consent.checked) {
+                alert('Пожалуйста, дайте согласие на обработку персональных данных');
+                return;
+            }
+            
+            // Show loading state
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Отправка...';
+            submitBtn.classList.add('loading');
+            
+            // Create FormData object
+            const formData = new FormData(form);
+            
+            // Send data to Formspree
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Success
+                    successMessage.style.display = 'block';
+                    document.querySelector('.bg-white.rounded-2xl').style.display = 'none';
+                    setTimeout(() => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }, 100);
+                } else {
+                    throw new Error('Network response was not ok');
+                }
+            })
+            .catch(error => {
+                // Error
+                errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 100);
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                // Reset button
+                setTimeout(() => {
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> Записаться';
+                    submitBtn.classList.remove('loading');
+                }, 1000);
+            });
+        });
+        
+        // Phone number formatting
+        document.getElementById('phone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 0) {
+                value = '+' + value;
+                if (value.length > 2) {
+                    value = value.substring(0, 2) + ' (' + value.substring(2);
+                }
+                if (value.length > 6) {
+                    value = value.substring(0, 6) + ') ' + value.substring(6);
+                }
+                if (value.length > 11) {
+                    value = value.substring(0, 11) + '-' + value.substring(11);
+                }
+                if (value.length > 14) {
+                    value = value.substring(0, 14) + '-' + value.substring(14);
+                }
+            }
+            e.target.value = value;
+        });
+        
+        // Toggle contact visibility
+        function toggleContact(type) {
+            const contactElement = document.getElementById(type + '-contact');
+            contactElement.style.display = contactElement.style.display === 'block' ? 'none' : 'block';
+            
+            // Add animation effect
+            contactElement.style.opacity = '0';
+            setTimeout(() => {
+                contactElement.style.opacity = '1';
+            }, 50);
+        }
+    </script>
+</body>
+</html>
