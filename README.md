@@ -1,2 +1,2 @@
-# neuroleptika-studio.github.io
-Кружок нейролепки - форма записи
+# neurolepka-studio.github.io
+Форма записи в кружок нейролепки "Детки в лепке"
